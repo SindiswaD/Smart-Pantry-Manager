@@ -15,15 +15,11 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnAddIngredient;
-
     private RecyclerView recyclerViewIngredients;
-
     private View cardEmptyPantry;
 
     private DatabaseHelper databaseHelper;
-
     private IngredientAdapter ingredientAdapter;
-
     private List<Ingredient> ingredientList;
 
     @Override
@@ -32,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
+        // Connect Java variables to XML views
         btnAddIngredient =
                 findViewById(R.id.btnAddIngredient);
 
@@ -41,17 +38,17 @@ public class MainActivity extends AppCompatActivity {
         cardEmptyPantry =
                 findViewById(R.id.cardEmptyPantry);
 
+        // Create database helper
         databaseHelper =
                 new DatabaseHelper(this);
+
+        // -------------------------------------------------
+        // SET UP PANTRY LIST
+        // -------------------------------------------------
 
         ingredientList =
                 new ArrayList<>();
 
-        /*
-         * loadIngredients is passed to the adapter.
-         * This allows the main screen to refresh
-         * immediately after an ingredient is deleted.
-         */
         ingredientAdapter =
                 new IngredientAdapter(
                         ingredientList,
@@ -66,12 +63,17 @@ public class MainActivity extends AppCompatActivity {
                 ingredientAdapter
         );
 
+        // -------------------------------------------------
+        // ADD INGREDIENT BUTTON
+        // -------------------------------------------------
+
         btnAddIngredient.setOnClickListener(v -> {
 
-            Intent intent = new Intent(
-                    MainActivity.this,
-                    AddEditIngredientActivity.class
-            );
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            AddEditIngredientActivity.class
+                    );
 
             startActivity(intent);
         });
@@ -84,6 +86,10 @@ public class MainActivity extends AppCompatActivity {
         loadIngredients();
     }
 
+    // -------------------------------------------------
+    // LOAD PANTRY INGREDIENTS
+    // -------------------------------------------------
+
     private void loadIngredients() {
 
         List<Ingredient> savedIngredients =
@@ -93,6 +99,7 @@ public class MainActivity extends AppCompatActivity {
                 savedIngredients
         );
 
+        // Show empty state if there are no ingredients
         if (savedIngredients.isEmpty()) {
 
             cardEmptyPantry.setVisibility(
