@@ -1667,4 +1667,219 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 values
         );
     }
+    // -------------------------------------------------
+// RECIPE RECOMMENDATION LOGIC
+// -------------------------------------------------
+
+    public List<Recipe> getRecommendedRecipes() {
+
+        List<Recipe> recommendedRecipes =
+                new ArrayList<>();
+
+        /*
+         * Get everything currently saved in the pantry
+         * and every recipe stored in the database.
+         */
+        List<Ingredient> pantryIngredients =
+                getAllIngredients();
+
+        List<Recipe> allRecipes =
+                getAllRecipes();
+
+        /*
+         * There is nothing to recommend if the
+         * pantry itself is empty.
+         */
+        if (pantryIngredients.isEmpty()) {
+            return recommendedRecipes;
+        }
+
+        /*
+         * Check each recipe one at a time.
+         */
+        for (Recipe recipe : allRecipes) {
+
+            List<RecipeIngredient> requiredIngredients =
+                    getRecipeIngredients(
+                            recipe.getId()
+                    );
+
+            boolean canMakeRecipe = true;
+
+            /*
+             * Every required ingredient must exist
+             * in the pantry in a sufficient quantity.
+             */
+            for (RecipeIngredient requiredIngredient
+                    : requiredIngredients) {
+
+                boolean ingredientAvailable = false;
+
+                for (Ingredient pantryIngredient
+                        : pantryIngredients) {
+
+                    /*
+                     * Ingredient names are compared
+                     * without caring about capital letters.
+                     *
+                     * Example:
+                     * "Eggs" matches "eggs".
+                     */
+                    if (pantryIngredient
+                            .getName()
+                            .trim()
+                            .equalsIgnoreCase(
+                                    requiredIngredient
+                                            .getIngredientName()
+                                            .trim()
+                            )) {
+
+                        double pantryQuantity =
+                                convertQuantity(
+                                        pantryIngredient.getQuantity(),
+                                        pantryIngredient.getUnit(),
+                                        requiredIngredient.getUnit()
+                                );
+
+                        /*
+                         * convertQuantity returns -1
+                         * when the two units cannot
+                         * sensibly be compared.
+                         */
+                        if (pantryQuantity >= 0
+                                && pantryQuantity >=
+                                requiredIngredient
+                                        .getRequiredQuantity()) {
+
+                            ingredientAvailable = true;
+                            break;
+                        }
+                    }
+                }
+
+                /*
+                 * One missing or insufficient ingredient
+                 * means this recipe cannot be made.
+                 */
+                if (!ingredientAvailable) {
+
+                    canMakeRecipe = false;
+                    break;
+                }
+            }
+
+            /*
+             * Only recipes for which every ingredient
+             * requirement has been satisfied are added.
+             */
+            if (canMakeRecipe
+                    && !requiredIngredients.isEmpty()) {
+
+                recommendedRecipes.add(recipe);
+            }
+        }
+
+        return recommendedRecipes;
+    }
+
+
+    /*
+     * Converts pantry quantities into the unit required
+     * by a recipe.
+     *
+     * Supported conversions:
+     *
+     * kg <-> g
+     * L  <-> ml
+     *
+     * Items must match Items.
+     */
+    private double convertQuantity(
+            double quantity,
+            String pantryUnit,
+            String requiredUnit
+    ) {
+
+        if (pantryUnit == null
+                || requiredUnit == null) {
+
+            return -1;
+        }
+
+        String from =
+                pantryUnit.trim();
+
+        String to =
+                requiredUnit.trim();
+
+        /*
+         * Same unit.
+         *
+         * Examples:
+         * g -> g
+         * ml -> ml
+         * Items -> Items
+         */
+        if (from.equalsIgnoreCase(to)) {
+            return quantity;
+        }
+
+        /*
+         * Kilograms to grams.
+         *
+         * 1 kg = 1000 g
+         */
+        if (from.equalsIgnoreCase("kg")
+                && to.equalsIgnoreCase("g")) {
+
+            return quantity * 1000;
+        }
+
+        /*
+         * Grams to kilograms.
+         */
+        if (from.equalsIgnoreCase("g")
+                && to.equalsIgnoreCase("kg")) {
+
+            return quantity / 1000;
+        }
+
+        /*
+         * Litres to millilitres.
+         *
+         * 1 L = 1000 ml
+         */
+        if ((from.equalsIgnoreCase("L")
+                || from.equalsIgnoreCase("litre")
+                || from.equalsIgnoreCase("litres"))
+                &&
+                (to.equalsIgnoreCase("ml")
+                        || to.equalsIgnoreCase("millilitre")
+                        || to.equalsIgnoreCase("millilitres"))) {
+
+            return quantity * 1000;
+        }
+
+        /*
+         * Millilitres to litres.
+         */
+        if ((from.equalsIgnoreCase("ml")
+                || from.equalsIgnoreCase("millilitre")
+                || from.equalsIgnoreCase("millilitres"))
+                &&
+                (to.equalsIgnoreCase("L")
+                        || to.equalsIgnoreCase("litre")
+                        || to.equalsIgnoreCase("litres"))) {
+
+            return quantity / 1000;
+        }
+
+        /*
+         * The units are incompatible.
+         *
+         * For example:
+         * 5 Items cannot be compared with 50 g.
+         */
+        return -1;
+    }
 }
