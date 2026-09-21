@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +16,10 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnAddIngredient;
+    private Button btnFindRecipes;
+
+    private ImageView navSettings;
+
     private RecyclerView recyclerViewIngredients;
     private View cardEmptyPantry;
 
@@ -32,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
         btnAddIngredient =
                 findViewById(R.id.btnAddIngredient);
 
+        btnFindRecipes =
+                findViewById(R.id.btnFindRecipes);
+
+        navSettings =
+                findViewById(R.id.navSettings);
+
         recyclerViewIngredients =
                 findViewById(R.id.recyclerViewIngredients);
 
@@ -42,13 +53,11 @@ public class MainActivity extends AppCompatActivity {
         databaseHelper =
                 new DatabaseHelper(this);
 
-        // -------------------------------------------------
-        // SET UP PANTRY LIST
-        // -------------------------------------------------
-
+        // Create empty ingredient list
         ingredientList =
                 new ArrayList<>();
 
+        // Create RecyclerView adapter
         ingredientAdapter =
                 new IngredientAdapter(
                         ingredientList,
@@ -63,16 +72,37 @@ public class MainActivity extends AppCompatActivity {
                 ingredientAdapter
         );
 
-        // -------------------------------------------------
         // ADD INGREDIENT BUTTON
-        // -------------------------------------------------
-
         btnAddIngredient.setOnClickListener(v -> {
 
             Intent intent =
                     new Intent(
                             MainActivity.this,
                             AddEditIngredientActivity.class
+                    );
+
+            startActivity(intent);
+        });
+
+        // WHAT CAN I MAKE BUTTON
+        btnFindRecipes.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            RecipeRecommendationsActivity.class
+                    );
+
+            startActivity(intent);
+        });
+
+        // SETTINGS BUTTON
+        navSettings.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            SettingsActivity.class
                     );
 
             startActivity(intent);
@@ -86,10 +116,6 @@ public class MainActivity extends AppCompatActivity {
         loadIngredients();
     }
 
-    // -------------------------------------------------
-    // LOAD PANTRY INGREDIENTS
-    // -------------------------------------------------
-
     private void loadIngredients() {
 
         List<Ingredient> savedIngredients =
@@ -99,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 savedIngredients
         );
 
-        // Show empty state if there are no ingredients
         if (savedIngredients.isEmpty()) {
 
             cardEmptyPantry.setVisibility(
@@ -110,6 +135,9 @@ public class MainActivity extends AppCompatActivity {
                     View.GONE
             );
 
+            btnFindRecipes.setEnabled(false);
+            btnFindRecipes.setAlpha(0.5f);
+
         } else {
 
             cardEmptyPantry.setVisibility(
@@ -119,6 +147,9 @@ public class MainActivity extends AppCompatActivity {
             recyclerViewIngredients.setVisibility(
                     View.VISIBLE
             );
+
+            btnFindRecipes.setEnabled(true);
+            btnFindRecipes.setAlpha(1.0f);
         }
     }
 }

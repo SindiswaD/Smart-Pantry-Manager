@@ -11,6 +11,7 @@
     android:paddingEnd="24dp"
     tools:context=".MainActivity">
 
+    <!-- SMART -->
     <TextView
         android:id="@+id/tvSmart"
         android:layout_width="wrap_content"
@@ -19,11 +20,38 @@
         android:letterSpacing="0.20"
         android:text="SMART"
         android:textColor="#B09171"
-        android:textSize="12sp"
+        android:textSize="25sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Settings button -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardSettings"
+        android:layout_width="54dp"
+        android:layout_height="54dp"
+        android:layout_marginTop="32dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardBackgroundColor="#E5DDC9"
+        app:cardCornerRadius="27dp"
+        app:cardElevation="0dp"
+        app:strokeWidth="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/navSettings"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="Settings"
+            android:padding="13dp"
+            android:src="@drawable/icon_settings" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <!-- Pantry title -->
     <TextView
         android:id="@+id/tvPantryTitle"
         android:layout_width="wrap_content"
@@ -36,6 +64,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvSmart" />
 
+    <!-- Subtitle -->
     <TextView
         android:id="@+id/tvSubtitle"
         android:layout_width="wrap_content"
@@ -47,6 +76,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPantryTitle" />
 
+    <!-- Divider -->
     <View
         android:id="@+id/divider"
         android:layout_width="0dp"
@@ -57,6 +87,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvSubtitle" />
 
+    <!-- Pantry heading -->
     <TextView
         android:id="@+id/tvPantryHeading"
         android:layout_width="wrap_content"
@@ -69,6 +100,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider" />
 
+    <!-- Pantry description -->
     <TextView
         android:id="@+id/tvPantryDescription"
         android:layout_width="wrap_content"
@@ -80,18 +112,21 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPantryHeading" />
 
+    <!-- Ingredient list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewIngredients"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
+        android:layout_marginBottom="12dp"
         android:clipToPadding="false"
         android:paddingBottom="12dp"
-        app:layout_constraintBottom_toTopOf="@id/btnAddIngredient"
+        app:layout_constraintBottom_toTopOf="@id/btnFindRecipes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPantryDescription" />
 
+    <!-- Empty pantry card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardEmptyPantry"
         android:layout_width="0dp"
@@ -140,6 +175,24 @@
 
     </androidx.cardview.widget.CardView>
 
+    <!-- Recipe recommendation button -->
+    <Button
+        android:id="@+id/btnFindRecipes"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        android:layout_marginBottom="10dp"
+        android:text="What Can I Make?"
+        android:textAllCaps="false"
+        android:textColor="#60412B"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="#DCCDB7"
+        app:cornerRadius="18dp"
+        app:layout_constraintBottom_toTopOf="@id/btnAddIngredient"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- Add ingredient button -->
     <Button
         android:id="@+id/btnAddIngredient"
         android:layout_width="0dp"
