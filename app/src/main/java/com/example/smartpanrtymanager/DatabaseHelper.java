@@ -1677,25 +1677,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new ArrayList<>();
 
         /*
-         * Get everything currently saved in the pantry
-         * and every recipe stored in the database.
+         * Get the ingredients currently saved
+         * in the user's pantry.
          */
         List<Ingredient> pantryIngredients =
                 getAllIngredients();
 
+        /*
+         * Get all recipes stored in SQLite.
+         */
         List<Recipe> allRecipes =
                 getAllRecipes();
 
         /*
-         * There is nothing to recommend if the
-         * pantry itself is empty.
+         * An empty pantry cannot produce
+         * meaningful recipe recommendations.
          */
         if (pantryIngredients.isEmpty()) {
+
             return recommendedRecipes;
         }
 
         /*
-         * Check each recipe one at a time.
+         * Check every recipe against the
+         * ingredients currently in the pantry.
          */
         for (Recipe recipe : allRecipes) {
 
@@ -1704,27 +1709,36 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                             recipe.getId()
                     );
 
-            boolean canMakeRecipe = true;
+            /*
+             * Ignore recipes that do not have
+             * ingredient requirements.
+             */
+            if (requiredIngredients.isEmpty()) {
+
+                continue;
+            }
+
+            int matchedIngredientCount = 0;
+
+            StringBuilder missingIngredients =
+                    new StringBuilder();
 
             /*
-             * Every required ingredient must exist
-             * in the pantry in a sufficient quantity.
+             * Check every ingredient required
+             * by this recipe.
              */
             for (RecipeIngredient requiredIngredient
                     : requiredIngredients) {
 
                 boolean ingredientAvailable = false;
 
+                /*
+                 * Search the user's pantry for
+                 * the required ingredient.
+                 */
                 for (Ingredient pantryIngredient
                         : pantryIngredients) {
 
-                    /*
-                     * Ingredient names are compared
-                     * without caring about capital letters.
-                     *
-                     * Example:
-                     * "Eggs" matches "eggs".
-                     */
                     if (pantryIngredient
                             .getName()
                             .trim()
@@ -1734,17 +1748,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                                             .trim()
                             )) {
 
+                        /*
+                         * Convert the pantry quantity
+                         * into the unit required by
+                         * the recipe.
+                         */
                         double pantryQuantity =
                                 convertQuantity(
-                                        pantryIngredient.getQuantity(),
-                                        pantryIngredient.getUnit(),
-                                        requiredIngredient.getUnit()
+                                        pantryIngredient
+                                                .getQuantity(),
+                                        pantryIngredient
+                                                .getUnit(),
+                                        requiredIngredient
+                                                .getUnit()
                                 );
 
                         /*
-                         * convertQuantity returns -1
-                         * when the two units cannot
-                         * sensibly be compared.
+                         * The ingredient counts as
+                         * available only when the unit
+                         * is compatible AND there is
+                         * enough of it.
                          */
                         if (pantryQuantity >= 0
                                 && pantryQuantity >=
@@ -1752,32 +1775,106 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                                         .getRequiredQuantity()) {
 
                             ingredientAvailable = true;
+
                             break;
                         }
                     }
                 }
 
-                /*
-                 * One missing or insufficient ingredient
-                 * means this recipe cannot be made.
-                 */
-                if (!ingredientAvailable) {
+                if (ingredientAvailable) {
 
-                    canMakeRecipe = false;
-                    break;
+                    matchedIngredientCount++;
+
+                } else {
+
+                    /*
+                     * Build a readable list of
+                     * missing or insufficient
+                     * ingredients.
+                     */
+                    if (missingIngredients.length() > 0) {
+
+                        missingIngredients.append(", ");
+                    }
+
+                    missingIngredients.append(
+                            requiredIngredient
+                                    .getIngredientName()
+                    );
                 }
             }
 
-            /*
-             * Only recipes for which every ingredient
-             * requirement has been satisfied are added.
-             */
-            if (canMakeRecipe
-                    && !requiredIngredients.isEmpty()) {
+            int totalIngredientCount =
+                    requiredIngredients.size();
 
-                recommendedRecipes.add(recipe);
+            /*
+             * Store the calculated recommendation
+             * information inside the Recipe object.
+             */
+            recipe.setMatchedIngredientCount(
+                    matchedIngredientCount
+            );
+
+            recipe.setTotalIngredientCount(
+                    totalIngredientCount
+            );
+
+            recipe.setMissingIngredients(
+                    missingIngredients.toString()
+            );
+
+            boolean canMakeNow =
+                    matchedIngredientCount
+                            == totalIngredientCount;
+
+            recipe.setCanMakeNow(
+                    canMakeNow
+            );
+
+            /*
+             * Calculate how closely the pantry
+             * matches this recipe.
+             */
+            int matchPercentage =
+                    recipe.getMatchPercentage();
+
+            /*
+             * Include:
+             *
+             * 100% matches - Can Make Now
+             *
+             * OR
+             *
+             * partial matches where at least
+             * half of the requirements are met.
+             */
+            if (canMakeNow
+                    || matchPercentage >= 50) {
+
+                recommendedRecipes.add(
+                        recipe
+                );
             }
         }
+
+        /*
+         * Sort recipes from the strongest
+         * pantry match to the weakest.
+         *
+         * Example:
+         *
+         * 100%
+         * 75%
+         * 67%
+         * 50%
+         */
+        recommendedRecipes.sort(
+                (recipe1, recipe2) ->
+                        Integer.compare(
+                                recipe2.getMatchPercentage(),
+                                recipe1.getMatchPercentage()
+                        )
+        );
 
         return recommendedRecipes;
     }

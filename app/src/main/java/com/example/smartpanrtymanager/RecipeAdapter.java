@@ -17,8 +17,8 @@ public class RecipeAdapter
     private final OnRecipeClickListener listener;
 
     /*
-     * This interface allows the Activity to know
-     * which recipe the user selected.
+     * Allows the Activity to know which
+     * recipe the user selected.
      */
     public interface OnRecipeClickListener {
 
@@ -62,6 +62,9 @@ public class RecipeAdapter
         Recipe recipe =
                 recipeList.get(position);
 
+        /*
+         * Display the basic recipe information.
+         */
         holder.tvRecipeName.setText(
                 recipe.getName()
         );
@@ -71,6 +74,73 @@ public class RecipeAdapter
         );
 
         /*
+         * Display how many of the recipe's
+         * ingredient requirements are currently
+         * satisfied by the pantry.
+         */
+        String matchText =
+                recipe.getMatchedIngredientCount()
+                        + " of "
+                        + recipe.getTotalIngredientCount()
+                        + " ingredients available • "
+                        + recipe.getMatchPercentage()
+                        + "% match";
+
+        holder.tvRecipeMatch.setText(
+                matchText
+        );
+
+        /*
+         * A complete match means the user
+         * currently has every required ingredient
+         * in a sufficient quantity.
+         */
+        if (recipe.isCanMakeNow()) {
+
+            holder.tvRecipeStatus.setText(
+                    "CAN MAKE NOW"
+            );
+
+            /*
+             * There is nothing missing, so this
+             * TextView should not take up space.
+             */
+            holder.tvMissingIngredients.setVisibility(
+                    View.GONE
+            );
+
+        } else {
+
+            holder.tvRecipeStatus.setText(
+                    "ALMOST THERE"
+            );
+
+            String missingIngredients =
+                    recipe.getMissingIngredients();
+
+            if (missingIngredients != null
+                    && !missingIngredients
+                    .trim()
+                    .isEmpty()) {
+
+                holder.tvMissingIngredients.setText(
+                        "Missing: "
+                                + missingIngredients
+                );
+
+                holder.tvMissingIngredients.setVisibility(
+                        View.VISIBLE
+                );
+
+            } else {
+
+                holder.tvMissingIngredients.setVisibility(
+                        View.GONE
+                );
+            }
+        }
+
+        /*
          * Open the selected recipe when
          * the user taps its card.
          */
@@ -78,7 +148,9 @@ public class RecipeAdapter
 
             if (listener != null) {
 
-                listener.onRecipeClick(recipe);
+                listener.onRecipeClick(
+                        recipe
+                );
             }
         });
     }
@@ -89,6 +161,10 @@ public class RecipeAdapter
         return recipeList.size();
     }
 
+    /*
+     * Replace the currently displayed recipe
+     * recommendations and refresh the RecyclerView.
+     */
     public void updateData(
             List<Recipe> newRecipeList
     ) {
@@ -102,6 +178,9 @@ public class RecipeAdapter
             extends RecyclerView.ViewHolder {
 
         TextView tvRecipeName;
+        TextView tvRecipeStatus;
+        TextView tvRecipeMatch;
+        TextView tvMissingIngredients;
         TextView tvRecipeInstructions;
 
         public RecipeViewHolder(
@@ -113,6 +192,21 @@ public class RecipeAdapter
             tvRecipeName =
                     itemView.findViewById(
                             R.id.tvRecipeName
+                    );
+
+            tvRecipeStatus =
+                    itemView.findViewById(
+                            R.id.tvRecipeStatus
+                    );
+
+            tvRecipeMatch =
+                    itemView.findViewById(
+                            R.id.tvRecipeMatch
+                    );
+
+            tvMissingIngredients =
+                    itemView.findViewById(
+                            R.id.tvMissingIngredients
                     );
 
             tvRecipeInstructions =

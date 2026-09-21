@@ -6,6 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginBottom="16dp"
+    android:foreground="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
     app:cardBackgroundColor="#E5DDC9"
     app:cardCornerRadius="20dp"
     app:cardElevation="0dp">
@@ -16,24 +19,91 @@
         android:orientation="vertical"
         android:padding="20dp">
 
+        <!-- Recipe name -->
+
         <TextView
             android:id="@+id/tvRecipeName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Recipe Name"
             android:textColor="#60412B"
-            android:textSize="19sp"
+            android:textSize="20sp"
             android:textStyle="bold" />
+
+        <!-- Recommendation status -->
+
+        <TextView
+            android:id="@+id/tvRecipeStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="#D4C7A5"
+            android:paddingStart="10dp"
+            android:paddingTop="5dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:text="CAN MAKE NOW"
+            android:textColor="#60412B"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <!-- Match percentage -->
+
+        <TextView
+            android:id="@+id/tvRecipeMatch"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="3 of 3 ingredients available • 100% match"
+            android:textColor="#60412B"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <!-- Missing ingredients -->
+
+        <TextView
+            android:id="@+id/tvMissingIngredients"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Missing: Tomato"
+            android:textColor="#9A654C"
+            android:textSize="13sp"
+            android:visibility="gone" />
+
+        <!-- Divider -->
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginTop="14dp"
+            android:background="#D2C5B1" />
+
+        <!-- Recipe instructions -->
 
         <TextView
             android:id="@+id/tvRecipeInstructions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="12dp"
+            android:ellipsize="end"
             android:lineSpacingExtra="3dp"
+            android:maxLines="3"
             android:text="Recipe instructions will appear here."
             android:textColor="#8A7867"
             android:textSize="14sp" />
+
+        <!-- Open recipe hint -->
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="end"
+            android:text="View Recipe  ›"
+            android:textColor="#60412B"
+            android:textSize="13sp"
+            android:textStyle="bold" />
 
     </LinearLayout>
 
