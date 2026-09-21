@@ -12,6 +12,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class IngredientAdapter
@@ -24,6 +28,7 @@ public class IngredientAdapter
             List<Ingredient> ingredientList,
             Runnable onDataChanged
     ) {
+
         this.ingredientList = ingredientList;
         this.onDataChanged = onDataChanged;
     }
@@ -35,13 +40,14 @@ public class IngredientAdapter
             int viewType
     ) {
 
-        View view = LayoutInflater
-                .from(parent.getContext())
-                .inflate(
-                        R.layout.item_ingredient,
-                        parent,
-                        false
-                );
+        View view =
+                LayoutInflater
+                        .from(parent.getContext())
+                        .inflate(
+                                R.layout.item_ingredient,
+                                parent,
+                                false
+                        );
 
         return new IngredientViewHolder(view);
     }
@@ -55,10 +61,16 @@ public class IngredientAdapter
         Ingredient ingredient =
                 ingredientList.get(position);
 
+        /*
+         * Ingredient name.
+         */
         holder.tvIngredientName.setText(
                 ingredient.getName()
         );
 
+        /*
+         * Quantity and unit.
+         */
         String quantityText =
                 formatQuantity(
                         ingredient.getQuantity()
@@ -70,30 +82,26 @@ public class IngredientAdapter
                 quantityText
         );
 
-        String expiryDate =
-                ingredient.getExpiryDate();
+        /*
+         * Display the expiry date and calculate
+         * whether the ingredient is expired,
+         * expiring today or expiring soon.
+         */
+        displayExpiryInformation(
+                holder,
+                ingredient.getExpiryDate()
+        );
 
-        if (expiryDate == null ||
-                expiryDate.isEmpty()) {
-
-            holder.tvExpiryDate.setText(
-                    "No expiry date"
-            );
-
-        } else {
-
-            holder.tvExpiryDate.setText(
-                    "Expires: " + expiryDate
-            );
-        }
-
-        // EDIT
+        /*
+         * EDIT INGREDIENT
+         */
         holder.btnEditIngredient.setOnClickListener(v -> {
 
-            Intent intent = new Intent(
-                    holder.itemView.getContext(),
-                    AddEditIngredientActivity.class
-            );
+            Intent intent =
+                    new Intent(
+                            holder.itemView.getContext(),
+                            AddEditIngredientActivity.class
+                    );
 
             intent.putExtra(
                     "ingredient_id",
@@ -125,7 +133,9 @@ public class IngredientAdapter
                     .startActivity(intent);
         });
 
-        // DELETE
+        /*
+         * DELETE INGREDIENT
+         */
         holder.btnDeleteIngredient.setOnClickListener(v -> {
 
             AlertDialog.Builder builder =
@@ -166,6 +176,7 @@ public class IngredientAdapter
                             ).show();
 
                             if (onDataChanged != null) {
+
                                 onDataChanged.run();
                             }
 
@@ -189,12 +200,167 @@ public class IngredientAdapter
         });
     }
 
+    /*
+     * Displays expiry information based on the
+     * current date and the ingredient's saved
+     * expiry date.
+     */
+    private void displayExpiryInformation(
+            IngredientViewHolder holder,
+            String expiryDate
+    ) {
+
+        /*
+         * Reset the status first because
+         * RecyclerView reuses card views.
+         */
+        holder.tvExpiryStatus.setVisibility(
+                View.GONE
+        );
+
+        if (expiryDate == null
+                || expiryDate.trim().isEmpty()) {
+
+            holder.tvExpiryDate.setText(
+                    "No expiry date"
+            );
+
+            return;
+        }
+
+        holder.tvExpiryDate.setText(
+                "Expires: " + expiryDate
+        );
+
+        try {
+
+            /*
+             * The app currently stores dates
+             * in formats such as 26/9/2026.
+             */
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern(
+                            "d/M/yyyy"
+                    );
+
+            LocalDate expiry =
+                    LocalDate.parse(
+                            expiryDate.trim(),
+                            formatter
+                    );
+
+            LocalDate today =
+                    LocalDate.now();
+
+            long daysUntilExpiry =
+                    ChronoUnit.DAYS.between(
+                            today,
+                            expiry
+                    );
+
+            /*
+             * The ingredient has already expired.
+             */
+            if (daysUntilExpiry < 0) {
+
+                long daysExpired =
+                        Math.abs(daysUntilExpiry);
+
+                if (daysExpired == 1) {
+
+                    holder.tvExpiryStatus.setText(
+                            "EXPIRED YESTERDAY"
+                    );
+
+                } else {
+
+                    holder.tvExpiryStatus.setText(
+                            "EXPIRED "
+                                    + daysExpired
+                                    + " DAYS AGO"
+                    );
+                }
+
+                holder.tvExpiryStatus.setVisibility(
+                        View.VISIBLE
+                );
+
+                return;
+            }
+
+            /*
+             * The ingredient expires today.
+             */
+            if (daysUntilExpiry == 0) {
+
+                holder.tvExpiryStatus.setText(
+                        "EXPIRES TODAY"
+                );
+
+                holder.tvExpiryStatus.setVisibility(
+                        View.VISIBLE
+                );
+
+                return;
+            }
+
+            /*
+             * The ingredient expires tomorrow.
+             */
+            if (daysUntilExpiry == 1) {
+
+                holder.tvExpiryStatus.setText(
+                        "EXPIRES TOMORROW"
+                );
+
+                holder.tvExpiryStatus.setVisibility(
+                        View.VISIBLE
+                );
+
+                return;
+            }
+
+            /*
+             * Ingredients expiring within the
+             * next seven days are highlighted.
+             */
+            if (daysUntilExpiry <= 7) {
+
+                holder.tvExpiryStatus.setText(
+                        "EXPIRING IN "
+                                + daysUntilExpiry
+                                + " DAYS"
+                );
+
+                holder.tvExpiryStatus.setVisibility(
+                        View.VISIBLE
+                );
+            }
+
+        } catch (DateTimeParseException e) {
+
+            /*
+             * If an older saved date has an
+             * unexpected format, keep displaying
+             * the original date rather than
+             * crashing the application.
+             */
+            holder.tvExpiryStatus.setVisibility(
+                    View.GONE
+            );
+        }
+    }
+
+    /*
+     * Prevent quantities such as 5.0 from
+     * displaying unnecessary decimal places.
+     */
     private String formatQuantity(
             double quantity
     ) {
 
-        if (quantity ==
-                Math.floor(quantity)) {
+        if (quantity
+                == Math.floor(quantity)) {
 
             return String.valueOf(
                     (int) quantity
@@ -228,6 +394,7 @@ public class IngredientAdapter
         TextView tvIngredientName;
         TextView tvIngredientDetails;
         TextView tvExpiryDate;
+        TextView tvExpiryStatus;
 
         Button btnEditIngredient;
         Button btnDeleteIngredient;
@@ -251,6 +418,11 @@ public class IngredientAdapter
             tvExpiryDate =
                     itemView.findViewById(
                             R.id.tvExpiryDate
+                    );
+
+            tvExpiryStatus =
+                    itemView.findViewById(
+                            R.id.tvExpiryStatus
                     );
 
             btnEditIngredient =
