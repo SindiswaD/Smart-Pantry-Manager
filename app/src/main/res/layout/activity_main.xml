@@ -37,9 +37,9 @@
         app:cardBackgroundColor="#E5DDC9"
         app:cardCornerRadius="27dp"
         app:cardElevation="0dp"
-        app:strokeWidth="0dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:strokeWidth="0dp">
 
         <ImageView
             android:id="@+id/navSettings"
@@ -112,32 +112,52 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvPantryHeading" />
 
+    <!-- Search ingredients -->
+    <EditText
+        android:id="@+id/etSearchIngredients"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="14dp"
+        android:backgroundTint="#B09171"
+        android:hint="Search ingredients..."
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:singleLine="true"
+        android:textColor="#60412B"
+        android:textColorHint="#9B8B7A"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvPantryDescription" />
+
     <!-- Ingredient list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewIngredients"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="14dp"
         android:layout_marginBottom="12dp"
         android:clipToPadding="false"
         android:paddingBottom="12dp"
         app:layout_constraintBottom_toTopOf="@id/btnFindRecipes"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvPantryDescription" />
+        app:layout_constraintTop_toBottomOf="@id/etSearchIngredients" />
 
     <!-- Empty pantry card -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardEmptyPantry"
         android:layout_width="0dp"
         android:layout_height="180dp"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         app:cardBackgroundColor="#E5DDC9"
         app:cardCornerRadius="22dp"
         app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvPantryDescription">
+        app:layout_constraintTop_toBottomOf="@id/etSearchIngredients">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -175,28 +195,87 @@
 
     </androidx.cardview.widget.CardView>
 
-    <!-- Recipe recommendation button -->
+    <!-- No search results -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardNoSearchResults"
+        android:layout_width="0dp"
+        android:layout_height="140dp"
+        android:layout_marginTop="20dp"
+        android:visibility="gone"
+        app:cardBackgroundColor="#E5DDC9"
+        app:cardCornerRadius="22dp"
+        app:cardElevation="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/etSearchIngredients">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="No ingredients found"
+                android:textColor="#60412B"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:gravity="center"
+                android:text="Try searching for another ingredient."
+                android:textColor="#8A7867"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+    </androidx.cardview.widget.CardView>
+
+    <!-- Strict recipe recommendations -->
     <Button
         android:id="@+id/btnFindRecipes"
         android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="8dp"
         android:text="What Can I Make?"
         android:textAllCaps="false"
         android:textColor="#60412B"
-        android:textSize="16sp"
+        android:textSize="15sp"
         android:textStyle="bold"
         app:backgroundTint="#DCCDB7"
+        app:cornerRadius="18dp"
+        app:layout_constraintBottom_toTopOf="@id/btnViewAllRecipes"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- All recipes -->
+    <Button
+        android:id="@+id/btnViewAllRecipes"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:layout_marginBottom="8dp"
+        android:text="View All Recipes"
+        android:textAllCaps="false"
+        android:textColor="#60412B"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:backgroundTint="#E5DDC9"
         app:cornerRadius="18dp"
         app:layout_constraintBottom_toTopOf="@id/btnAddIngredient"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- Add ingredient button -->
+    <!-- Add ingredient -->
     <Button
         android:id="@+id/btnAddIngredient"
         android:layout_width="0dp"
-        android:layout_height="58dp"
+        android:layout_height="56dp"
         android:layout_marginBottom="20dp"
         android:text="+ Add Ingredient"
         android:textAllCaps="false"

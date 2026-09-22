@@ -1995,4 +1995,76 @@ public class DatabaseHelper extends SQLiteOpenHelper {
          */
         return -1;
     }
+
+    // -------------------------------------------------
+    // ALL RECIPES WITH PANTRY MATCH INFORMATION
+    // -------------------------------------------------
+
+    public List<Recipe> getAllRecipesWithMatchInformation() {
+
+        List<Recipe> recipes = getAllRecipes();
+        List<Ingredient> pantryIngredients = getAllIngredients();
+
+        for (Recipe recipe : recipes) {
+
+            List<RecipeIngredient> requiredIngredients =
+                    getRecipeIngredients(recipe.getId());
+
+            int matchedIngredientCount = 0;
+            StringBuilder missingIngredients = new StringBuilder();
+
+            for (RecipeIngredient requiredIngredient : requiredIngredients) {
+
+                boolean ingredientAvailable = false;
+
+                for (Ingredient pantryIngredient : pantryIngredients) {
+
+                    if (ingredientNamesMatch(
+                            pantryIngredient.getName(),
+                            requiredIngredient.getIngredientName())) {
+
+                        double pantryQuantity = convertQuantity(
+                                pantryIngredient.getQuantity(),
+                                pantryIngredient.getUnit(),
+                                requiredIngredient.getUnit());
+
+                        if (pantryQuantity >= 0
+                                && pantryQuantity >= requiredIngredient.getRequiredQuantity()) {
+
+                            ingredientAvailable = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (ingredientAvailable) {
+                    matchedIngredientCount++;
+                } else {
+                    if (missingIngredients.length() > 0) {
+                        missingIngredients.append(", ");
+                    }
+                    missingIngredients.append(requiredIngredient.getIngredientName());
+                }
+            }
+
+            recipe.setMatchedIngredientCount(matchedIngredientCount);
+            recipe.setTotalIngredientCount(requiredIngredients.size());
+            recipe.setMissingIngredients(missingIngredients.toString());
+
+            boolean canMakeNow =
+                    !requiredIngredients.isEmpty()
+                            && matchedIngredientCount == requiredIngredients.size();
+
+            recipe.setCanMakeNow(canMakeNow);
+        }
+
+        recipes.sort(
+                (recipe1, recipe2) ->
+                        Integer.compare(
+                                recipe2.getMatchPercentage(),
+                                recipe1.getMatchPercentage()));
+
+        return recipes;
+    }
+
 }

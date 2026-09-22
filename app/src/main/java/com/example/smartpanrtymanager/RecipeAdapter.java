@@ -74,16 +74,22 @@ public class RecipeAdapter
         );
 
         /*
-         * Display how many of the recipe's
-         * ingredient requirements are currently
-         * satisfied by the pantry.
+         * Calculate the pantry match percentage.
+         */
+        int matchPercentage =
+                recipe.getMatchPercentage();
+
+        /*
+         * Display how many recipe ingredient
+         * requirements are currently satisfied
+         * by the pantry.
          */
         String matchText =
                 recipe.getMatchedIngredientCount()
                         + " of "
                         + recipe.getTotalIngredientCount()
                         + " ingredients available • "
-                        + recipe.getMatchPercentage()
+                        + matchPercentage
                         + "% match";
 
         holder.tvRecipeMatch.setText(
@@ -91,9 +97,13 @@ public class RecipeAdapter
         );
 
         /*
-         * A complete match means the user
-         * currently has every required ingredient
-         * in a sufficient quantity.
+         * Decide which status should be shown
+         * according to the pantry match.
+         *
+         * 100%      = Can Make Now
+         * 50%-99%   = Almost There
+         * 1%-49%    = Some Ingredients Available
+         * 0%        = Ingredients Needed
          */
         if (recipe.isCanMakeNow()) {
 
@@ -102,8 +112,8 @@ public class RecipeAdapter
             );
 
             /*
-             * There is nothing missing, so this
-             * TextView should not take up space.
+             * A complete match means nothing
+             * else is required.
              */
             holder.tvMissingIngredients.setVisibility(
                     View.GONE
@@ -111,20 +121,41 @@ public class RecipeAdapter
 
         } else {
 
-            holder.tvRecipeStatus.setText(
-                    "ALMOST THERE"
-            );
+            if (matchPercentage >= 50) {
+
+                holder.tvRecipeStatus.setText(
+                        "ALMOST THERE"
+                );
+
+            } else if (matchPercentage > 0) {
+
+                holder.tvRecipeStatus.setText(
+                        "SOME INGREDIENTS AVAILABLE"
+                );
+
+            } else {
+
+                holder.tvRecipeStatus.setText(
+                        "INGREDIENTS NEEDED"
+                );
+            }
 
             String missingIngredients =
                     recipe.getMissingIngredients();
 
+            /*
+             * "Need" is used instead of "Missing"
+             * because an ingredient may exist in
+             * the pantry but not in a sufficient
+             * quantity.
+             */
             if (missingIngredients != null
                     && !missingIngredients
                     .trim()
                     .isEmpty()) {
 
                 holder.tvMissingIngredients.setText(
-                        "Missing: "
+                        "Need: "
                                 + missingIngredients
                 );
 
@@ -163,7 +194,7 @@ public class RecipeAdapter
 
     /*
      * Replace the currently displayed recipe
-     * recommendations and refresh the RecyclerView.
+     * list and refresh the RecyclerView.
      */
     public void updateData(
             List<Recipe> newRecipeList

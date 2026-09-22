@@ -2,8 +2,11 @@ package com.example.smartpantrymanager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,25 +23,29 @@ public class MainActivity extends AppCompatActivity {
 
     private Button btnAddIngredient;
     private Button btnFindRecipes;
+    private Button btnViewAllRecipes;
 
     private ImageView navSettings;
 
+    private EditText etSearchIngredients;
+
     private RecyclerView recyclerViewIngredients;
+
     private View cardEmptyPantry;
+    private View cardNoSearchResults;
 
     private DatabaseHelper databaseHelper;
     private IngredientAdapter ingredientAdapter;
-    private List<Ingredient> ingredientList;
 
     /*
-     * The format currently used when ingredient
-     * expiry dates are stored in the database.
+     * Contains the complete pantry.
      *
-     * Examples:
-     * 2/9/2026
-     * 21/9/2026
-     * 26/9/2026
+     * This is kept separate from the filtered
+     * RecyclerView data so clearing the search
+     * immediately restores all ingredients.
      */
+    private List<Ingredient> ingredientList;
+
     private final DateTimeFormatter expiryDateFormatter =
             DateTimeFormatter.ofPattern(
                     "d/M/yyyy"
@@ -68,9 +75,19 @@ public class MainActivity extends AppCompatActivity {
                         R.id.btnFindRecipes
                 );
 
+        btnViewAllRecipes =
+                findViewById(
+                        R.id.btnViewAllRecipes
+                );
+
         navSettings =
                 findViewById(
                         R.id.navSettings
+                );
+
+        etSearchIngredients =
+                findViewById(
+                        R.id.etSearchIngredients
                 );
 
         recyclerViewIngredients =
@@ -83,22 +100,30 @@ public class MainActivity extends AppCompatActivity {
                         R.id.cardEmptyPantry
                 );
 
+        cardNoSearchResults =
+                findViewById(
+                        R.id.cardNoSearchResults
+                );
+
         /*
-         * Create the database helper.
+         * Create database helper.
          */
         databaseHelper =
                 new DatabaseHelper(this);
 
         /*
-         * Create the ingredient list used
-         * by the RecyclerView.
+         * Create the list used to keep the
+         * complete pantry contents.
          */
         ingredientList =
                 new ArrayList<>();
 
+        /*
+         * Create RecyclerView adapter.
+         */
         ingredientAdapter =
                 new IngredientAdapter(
-                        ingredientList,
+                        new ArrayList<>(),
                         this::loadIngredients
                 );
 
@@ -126,6 +151,11 @@ public class MainActivity extends AppCompatActivity {
 
         /*
          * WHAT CAN I MAKE?
+         *
+         * This screen uses strict matching.
+         * Only recipes where every required
+         * ingredient is available in a sufficient
+         * quantity are displayed.
          */
         btnFindRecipes.setOnClickListener(v -> {
 
@@ -133,6 +163,24 @@ public class MainActivity extends AppCompatActivity {
                     new Intent(
                             MainActivity.this,
                             RecipeRecommendationsActivity.class
+                    );
+
+            startActivity(intent);
+        });
+
+        /*
+         * VIEW ALL RECIPES
+         *
+         * This screen shows the complete recipe
+         * collection together with pantry match
+         * percentages and missing ingredients.
+         */
+        btnViewAllRecipes.setOnClickListener(v -> {
+
+            Intent intent =
+                    new Intent(
+                            MainActivity.this,
+                            AllRecipesActivity.class
                     );
 
             startActivity(intent);
@@ -151,6 +199,49 @@ public class MainActivity extends AppCompatActivity {
 
             startActivity(intent);
         });
+
+        /*
+         * SEARCH INGREDIENTS
+         *
+         * The RecyclerView updates immediately
+         * as the user types.
+         */
+        etSearchIngredients.addTextChangedListener(
+                new TextWatcher() {
+
+                    @Override
+                    public void beforeTextChanged(
+                            CharSequence s,
+                            int start,
+                            int count,
+                            int after
+                    ) {
+
+                        // No action required.
+                    }
+
+                    @Override
+                    public void onTextChanged(
+                            CharSequence s,
+                            int start,
+                            int before,
+                            int count
+                    ) {
+
+                        filterIngredients(
+                                s.toString()
+                        );
+                    }
+
+                    @Override
+                    public void afterTextChanged(
+                            Editable s
+                    ) {
+
+                        // No action required.
+                    }
+                }
+        );
     }
 
     @Override
@@ -161,9 +252,6 @@ public class MainActivity extends AppCompatActivity {
         /*
          * Reload the pantry whenever the user
          * returns to this screen.
-         *
-         * This ensures newly added, edited or
-         * deleted ingredients appear immediately.
          */
         loadIngredients();
     }
@@ -174,38 +262,54 @@ public class MainActivity extends AppCompatActivity {
                 databaseHelper.getAllIngredients();
 
         /*
-         * Sort ingredients by expiry urgency
-         * before displaying them.
-         *
-         * Expired ingredients appear first,
-         * followed by the nearest upcoming
-         * expiry dates.
-         *
-         * Ingredients without an expiry date
-         * appear at the bottom.
+         * Keep expiry-priority sorting.
          */
         sortIngredientsByExpiry(
                 savedIngredients
         );
 
-        ingredientAdapter.updateData(
-                savedIngredients
-        );
+        /*
+         * Store the complete sorted pantry.
+         */
+        ingredientList =
+                savedIngredients;
 
         /*
-         * Display the empty pantry card when
-         * there are no saved ingredients.
+         * Preserve the current search when
+         * returning from another Activity.
          */
+        String currentSearch =
+                etSearchIngredients
+                        .getText()
+                        .toString();
+
         if (savedIngredients.isEmpty()) {
+
+            ingredientAdapter.updateData(
+                    new ArrayList<>()
+            );
 
             cardEmptyPantry.setVisibility(
                     View.VISIBLE
+            );
+
+            cardNoSearchResults.setVisibility(
+                    View.GONE
             );
 
             recyclerViewIngredients.setVisibility(
                     View.GONE
             );
 
+            etSearchIngredients.setEnabled(
+                    false
+            );
+
+            /*
+             * Strict recipe recommendations are
+             * disabled when the pantry is empty
+             * because nothing can be made.
+             */
             btnFindRecipes.setEnabled(
                     false
             );
@@ -214,14 +318,27 @@ public class MainActivity extends AppCompatActivity {
                     0.5f
             );
 
+            /*
+             * All Recipes remains available.
+             * Users can browse the recipe collection
+             * even when their pantry is empty.
+             */
+            btnViewAllRecipes.setEnabled(
+                    true
+            );
+
+            btnViewAllRecipes.setAlpha(
+                    1.0f
+            );
+
         } else {
 
             cardEmptyPantry.setVisibility(
                     View.GONE
             );
 
-            recyclerViewIngredients.setVisibility(
-                    View.VISIBLE
+            etSearchIngredients.setEnabled(
+                    true
             );
 
             btnFindRecipes.setEnabled(
@@ -231,20 +348,127 @@ public class MainActivity extends AppCompatActivity {
             btnFindRecipes.setAlpha(
                     1.0f
             );
+
+            btnViewAllRecipes.setEnabled(
+                    true
+            );
+
+            btnViewAllRecipes.setAlpha(
+                    1.0f
+            );
+
+            /*
+             * Display either the complete pantry
+             * or the currently filtered result.
+             */
+            filterIngredients(
+                    currentSearch
+            );
         }
     }
 
     /*
-     * Sort the pantry according to expiry date.
+     * Filter ingredients using the text entered
+     * into the search field.
+     */
+    private void filterIngredients(
+            String searchText
+    ) {
+
+        /*
+         * If the actual pantry is empty,
+         * the empty pantry state is handled
+         * by loadIngredients().
+         */
+        if (ingredientList == null
+                || ingredientList.isEmpty()) {
+
+            return;
+        }
+
+        String searchQuery =
+                searchText
+                        .trim()
+                        .toLowerCase();
+
+        List<Ingredient> filteredIngredients =
+                new ArrayList<>();
+
+        /*
+         * An empty search means show
+         * the complete pantry.
+         */
+        if (searchQuery.isEmpty()) {
+
+            filteredIngredients.addAll(
+                    ingredientList
+            );
+
+        } else {
+
+            for (Ingredient ingredient
+                    : ingredientList) {
+
+                String ingredientName =
+                        ingredient
+                                .getName()
+                                .toLowerCase();
+
+                /*
+                 * Contains() allows partial searches.
+                 *
+                 * Examples:
+                 *
+                 * "mil" finds "Milk"
+                 * "egg" finds "Eggs"
+                 */
+                if (ingredientName.contains(
+                        searchQuery
+                )) {
+
+                    filteredIngredients.add(
+                            ingredient
+                    );
+                }
+            }
+        }
+
+        ingredientAdapter.updateData(
+                filteredIngredients
+        );
+
+        /*
+         * The pantry contains ingredients,
+         * but none matched the search.
+         */
+        if (filteredIngredients.isEmpty()) {
+
+            recyclerViewIngredients.setVisibility(
+                    View.GONE
+            );
+
+            cardNoSearchResults.setVisibility(
+                    View.VISIBLE
+            );
+
+        } else {
+
+            recyclerViewIngredients.setVisibility(
+                    View.VISIBLE
+            );
+
+            cardNoSearchResults.setVisibility(
+                    View.GONE
+            );
+        }
+    }
+
+    /*
+     * Sort ingredients according to expiry date.
      *
-     * Example:
-     *
-     * Expired yesterday
-     * Expires today
-     * Expires tomorrow
-     * Expires in 5 days
-     * Expires next month
-     * No expiry date
+     * Earlier expiry dates appear first.
+     * Ingredients without an expiry date appear
+     * at the bottom.
      */
     private void sortIngredientsByExpiry(
             List<Ingredient> ingredients
@@ -265,43 +489,22 @@ public class MainActivity extends AppCompatActivity {
                                             .getExpiryDate()
                             );
 
-                    /*
-                     * Neither ingredient has a
-                     * usable expiry date.
-                     *
-                     * Keep their existing order.
-                     */
                     if (date1 == null
                             && date2 == null) {
 
                         return 0;
                     }
 
-                    /*
-                     * Ingredient 1 has no expiry
-                     * date, so place it after
-                     * ingredient 2.
-                     */
                     if (date1 == null) {
 
                         return 1;
                     }
 
-                    /*
-                     * Ingredient 2 has no expiry
-                     * date, so place it after
-                     * ingredient 1.
-                     */
                     if (date2 == null) {
 
                         return -1;
                     }
 
-                    /*
-                     * Earlier dates have greater
-                     * urgency and therefore appear
-                     * first.
-                     */
                     return date1.compareTo(
                             date2
                     );
@@ -310,12 +513,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /*
-     * Convert the expiry date String stored in
-     * SQLite into a LocalDate that can be sorted.
-     *
-     * Returning null allows ingredients with no
-     * expiry date, or an unexpected date format,
-     * to safely move to the bottom of the list.
+     * Convert the stored expiry date into a
+     * LocalDate so it can be sorted.
      */
     private LocalDate parseExpiryDate(
             String expiryDate
