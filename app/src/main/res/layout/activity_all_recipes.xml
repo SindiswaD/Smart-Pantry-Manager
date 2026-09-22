@@ -11,31 +11,32 @@
     android:paddingEnd="24dp"
     tools:context=".AllRecipesActivity">
 
-    <!-- Back button -->
+    <!-- Pantry Back Button -->
     <TextView
         android:id="@+id/tvBack"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:text="‹  Pantry"
+        android:layout_width="110dp"
+        android:layout_height="48dp"
+        android:layout_marginTop="18dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:text="‹ Pantry"
         android:textColor="#60412B"
-        android:textSize="16sp"
+        android:textSize="14sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Small heading -->
+    <!-- Explore label -->
     <TextView
         android:id="@+id/tvAll"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
         android:letterSpacing="0.20"
         android:text="EXPLORE"
         android:textColor="#B09171"
-        android:textSize="17sp"
+        android:textSize="12sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvBack" />
@@ -45,11 +46,11 @@
         android:id="@+id/tvAllRecipesTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
         android:fontFamily="cursive"
         android:text="All Recipes"
         android:textColor="#60412B"
-        android:textSize="42sp"
-        android:textStyle="bold"
+        android:textSize="38sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvAll" />
 
@@ -58,10 +59,10 @@
         android:id="@+id/tvAllRecipesSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:text="See every recipe and how much of it you can already make."
         android:textColor="#8A7867"
-        android:textSize="14sp"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvAllRecipesTitle" />
@@ -71,7 +72,7 @@
         android:id="@+id/divider"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="18dp"
         android:background="#D7C9B8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -82,10 +83,10 @@
         android:id="@+id/tvRecipeCollectionHeading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="18dp"
         android:text="Recipe Collection"
         android:textColor="#60412B"
-        android:textSize="21sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider" />
@@ -98,17 +99,17 @@
         android:layout_marginTop="5dp"
         android:text="Recipes with the highest pantry match are shown first."
         android:textColor="#8A7867"
-        android:textSize="13sp"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvRecipeCollectionHeading" />
 
-    <!-- All recipes -->
+    <!-- All Recipes List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewAllRecipes"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="14dp"
         android:clipToPadding="false"
         android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"

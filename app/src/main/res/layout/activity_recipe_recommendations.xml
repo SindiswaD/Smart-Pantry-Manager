@@ -3,74 +3,66 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F5F0E7">
+    android:background="#EAE6DE"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    tools:context=".RecipeRecommendationsActivity">
 
-    <!-- Back button -->
+    <!-- Pantry Back Button -->
     <TextView
         android:id="@+id/tvBack"
-        android:layout_width="wrap_content"
+        android:layout_width="110dp"
         android:layout_height="48dp"
-        android:layout_marginStart="18dp"
-        android:layout_marginTop="12dp"
-        android:gravity="center"
-        android:minWidth="70dp"
-        android:paddingStart="6dp"
-        android:paddingEnd="12dp"
-        android:text="‹ Back"
-        android:textColor="#684126"
-        android:textSize="15sp"
-        android:textStyle="bold"
+        android:layout_marginTop="18dp"
         android:clickable="true"
         android:focusable="true"
+        android:gravity="center_vertical"
+        android:text="‹ Pantry"
+        android:textColor="#60412B"
+        android:textSize="14sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Small brand text -->
+    <!-- Small heading -->
     <TextView
-        android:id="@+id/tvSmart"
+        android:id="@+id/tvIdeasLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:letterSpacing="0.25"
-        android:text="SMART"
-        android:textColor="#B79A76"
-        android:textSize="10sp"
+        android:layout_marginTop="16dp"
+        android:letterSpacing="0.20"
+        android:text="RECIPE IDEAS"
+        android:textColor="#B09171"
+        android:textSize="12sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/tvBack" />
 
     <!-- Main title -->
     <TextView
         android:id="@+id/tvRecipeTitle"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginTop="2dp"
         android:fontFamily="cursive"
-        android:gravity="center"
-        android:text="Recipe Ideas"
-        android:textColor="#684126"
+        android:text="What Can I Make?"
+        android:textColor="#60412B"
         android:textSize="38sp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvSmart" />
+        app:layout_constraintTop_toBottomOf="@id/tvIdeasLabel" />
 
     <!-- Subtitle -->
     <TextView
         android:id="@+id/tvRecipeSubtitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="30dp"
-        android:gravity="center"
+        android:layout_marginTop="2dp"
         android:text="Let's see what you can make with what's already in your pantry."
-        android:textColor="#8B7B6A"
-        android:textSize="13sp"
+        android:textColor="#8A7867"
+        android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvRecipeTitle" />
@@ -80,10 +72,8 @@
         android:id="@+id/divider"
         android:layout_width="0dp"
         android:layout_height="1dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="22dp"
-        android:layout_marginEnd="24dp"
-        android:background="#DDD2C1"
+        android:layout_marginTop="18dp"
+        android:background="#D7C9B8"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tvRecipeSubtitle" />
@@ -91,29 +81,24 @@
     <!-- Section heading -->
     <TextView
         android:id="@+id/tvRecommendationsHeading"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="24dp"
-        android:text="What You Can Make"
-        android:textColor="#684126"
+        android:layout_marginTop="18dp"
+        android:text="Ready to Make"
+        android:textColor="#60412B"
         android:textSize="20sp"
         android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/divider" />
 
-    <!-- Explanation -->
+    <!-- Strict matching explanation -->
     <TextView
         android:id="@+id/tvRecommendationsDescription"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
         android:layout_marginTop="5dp"
-        android:layout_marginEnd="24dp"
-        android:text="Recipes are matched against the ingredients saved in your pantry."
-        android:textColor="#9A8B7B"
+        android:text="Only recipes you can make with all the required ingredients are shown here."
+        android:textColor="#8A7867"
         android:textSize="12sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -124,25 +109,21 @@
         android:id="@+id/recyclerViewRecipes"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="20dp"
+        android:layout_marginTop="14dp"
         android:clipToPadding="false"
-        android:paddingBottom="12dp"
+        android:paddingBottom="24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tvRecommendationsDescription" />
+        app:layout_constraintTop_toBottomOf="@id/tvRecommendationsDescription"
+        tools:listitem="@layout/item_recipe" />
 
-    <!-- Empty state -->
+    <!-- No strict matches -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardNoRecipes"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginEnd="24dp"
+        android:layout_marginTop="24dp"
         android:visibility="gone"
         app:cardBackgroundColor="#EDE2CC"
         app:cardCornerRadius="14dp"
@@ -162,7 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Nothing on the menu yet"
-                android:textColor="#684126"
+                android:textColor="#60412B"
                 android:textSize="17sp"
                 android:textStyle="bold" />
 
@@ -171,8 +152,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:text="Add a few more ingredients to your pantry and come back for recipe ideas."
-                android:textColor="#8B7B6A"
+                android:text="You don't currently have all the required ingredients for any recipe. Add more ingredients to your pantry and try again."
+                android:textColor="#8A7867"
                 android:textSize="13sp" />
 
         </LinearLayout>

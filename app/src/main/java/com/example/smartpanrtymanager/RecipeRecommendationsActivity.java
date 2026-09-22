@@ -13,8 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecipeRecommendationsActivity
-        extends AppCompatActivity {
+public class RecipeRecommendationsActivity extends AppCompatActivity {
 
     private TextView tvBack;
     private RecyclerView recyclerViewRecipes;
@@ -23,12 +22,8 @@ public class RecipeRecommendationsActivity
     private DatabaseHelper databaseHelper;
     private RecipeAdapter recipeAdapter;
 
-    private List<Recipe> recommendedRecipes;
-
     @Override
-    protected void onCreate(
-            Bundle savedInstanceState
-    ) {
+    protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
 
@@ -36,8 +31,13 @@ public class RecipeRecommendationsActivity
                 R.layout.activity_recipe_recommendations
         );
 
+        /*
+         * Connect views.
+         */
         tvBack =
-                findViewById(R.id.tvBack);
+                findViewById(
+                        R.id.tvBack
+                );
 
         recyclerViewRecipes =
                 findViewById(
@@ -52,17 +52,15 @@ public class RecipeRecommendationsActivity
         databaseHelper =
                 new DatabaseHelper(this);
 
-        recommendedRecipes =
-                new ArrayList<>();
-
         /*
-         * When a recipe is clicked,
-         * open the Recipe Detail screen.
+         * Start the adapter with an empty list.
+         * Strict recipe recommendations are loaded
+         * from the database below.
          */
         recipeAdapter =
                 new RecipeAdapter(
-                        recommendedRecipes,
-                        recipe -> openRecipeDetails(recipe)
+                        new ArrayList<>(),
+                        this::openRecipeDetails
                 );
 
         recyclerViewRecipes.setLayoutManager(
@@ -74,7 +72,10 @@ public class RecipeRecommendationsActivity
         );
 
         /*
-         * Return to the pantry screen.
+         * Return to the previous screen.
+         *
+         * This uses the same approach as
+         * AllRecipesActivity.
          */
         tvBack.setOnClickListener(v ->
                 getOnBackPressedDispatcher()
@@ -89,17 +90,31 @@ public class RecipeRecommendationsActivity
 
         super.onResume();
 
+        /*
+         * Reload recommendations whenever the
+         * user returns to this screen.
+         */
         loadRecipeRecommendations();
     }
 
     private void loadRecipeRecommendations() {
 
+        /*
+         * getRecommendedRecipes() applies the
+         * strict pantry matching rules.
+         */
         List<Recipe> recipes =
                 databaseHelper
                         .getRecommendedRecipes();
 
-        recipeAdapter.updateData(recipes);
+        recipeAdapter.updateData(
+                recipes
+        );
 
+        /*
+         * Show feedback when there are no
+         * complete recipe matches.
+         */
         if (recipes.isEmpty()) {
 
             recyclerViewRecipes.setVisibility(
@@ -132,10 +147,6 @@ public class RecipeRecommendationsActivity
                         RecipeDetailActivity.class
                 );
 
-        /*
-         * Send the selected recipe information
-         * to the detail screen.
-         */
         intent.putExtra(
                 "recipe_id",
                 recipe.getId()
